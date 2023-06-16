@@ -2,86 +2,88 @@ const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
 
 // The `/api/tags` endpoint
-
-router.get('/', (req, res) => {
-  Tag.findAll()
-  
-  // be sure to include its associated Product data
-});
-
-router.get('/:id', (req, res) => {
-    const id = req.params.id;
-    const TagData = await Tag.findByPk(id, {
-      include: [{ model: LibraryCard }],
-      // Change relatonhsip
-    });
-
-    if (!readerData) {
-      res.status(404).json({ message: 'No reader found with that id!' });
-      return;
-    }
-
-    res.status(200).json(TagData);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-
-
-  // find a single tag by its `id`
-  // be sure to include its associated Product data
-});
-
-router.post('/', (req, res) => {
-  // create a new tag
-  
-});
-
-router.put('/:id', (req, res) => {
-  Tag.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Tutorial was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update Tutorial with id=${id}. Maybe Tutorial was not found or req.body is empty!`
-        });
-      }
+router.get("/", (req, res) => {
+  Tag.findAll({include: [Product]})
+    .then((tags) => {
+      res.json({data: tags});
+      console.log("Find all tags was a success");
     })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating Tutorial with id=" + id
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        err: "Internal error",
       });
     });
-  // update a tag's name by its `id` value
 });
 
-router.delete('/:id', (req, res) => {
-  const id = req.params.id;
+// Find one Tag by its `id` value
+router.get("/:id", (req, res) => {
+  Tag.findByPk(req.params.id, {include: [Product]})
+    .then((tags) => {
+      res.json({data: tags});
+      console.log("Find all tags was a success");
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        err: "Internal error",
+      });
+    });
+});
 
+// Create a new Tag
+router.post("/", (req, res) => {
+  
+  Tag.create(req.body)
+    .then((newTag) => {
+      res.json({ data: newTag });
+      console.log("New Tag added");
+    })
+    .catch((err) => {
+      console.log(err);
+      // Practicing validations
+      res.status(500).json({ err: "Internal error" })
+    });
+});
+
+// Update a Tag by its `id` value
+router.put("/:id", (req, res) => {
+  Tag.update(
+    { tag_name: req.body.tag_name }, 
+    { where: { id: req.params.id } }
+  )
+  .then((rowsUpdated) => {
+    res.json(rowsUpdated)
+  })
+  .catch((err) => {
+    console.log(err);
+    res.status(500).json({
+      err: 'Internal server error'
+    })
+  })
+});
+
+// Delete Tag by ID
+router.delete("/:id", (req, res) => {
   Tag.destroy({
-    where: { id: id }
+    where: {
+      id: req.params.id
+    }
   })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Tag was deleted successfully!"
-        });
-      } else {
-        res.send({
-          message: `Cannot delete Tag with id=${id}. Maybe Tutorial was not found!`
-        });
-      }
+  .then(deleted => {
+    res.json({
+      data: deleted,
     })
-    .catch(err => {
-      res.status(500).send({
-        message: "Could not delete Tag with id=" + id
-      });
-    });
-  // delete on tag by its `id` value
+    console.log("Successfully deleted Tag");
+  })
+  .catch((err) => {
+    console.log(err);
+    res.status(500).json({
+      err: 'Internal server error'
+    })
+  })
+  
 });
+
 
 module.exports = router;
