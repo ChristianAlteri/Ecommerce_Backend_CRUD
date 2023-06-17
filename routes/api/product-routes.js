@@ -1,29 +1,30 @@
-const router = require('express').Router();
-const { Product, Category, Tag, ProductTag } = require('../../models');
+// Importing dependencies
 
-// The `/api/products` endpoint
+const router = require("express").Router();
+const { Product, Category, Tag, ProductTag } = require("../../models");
+
+// ____The `/api/products` endpoint____
 
 // Find all Products
-router.get('/', (req, res) => {
-  Product.findAll({include: [Category, Tag]})
-  .then((products) => {
-    res.json({data: products});
-    console.log("Find all products was a success");
-  })
-  .catch((err) => {
-    console.log(err);
-    res.status(500).json({
-      err: "Internal error",
+router.get("/", (req, res) => {
+  Product.findAll({ include: [Category, Tag] })
+    .then((products) => {
+      res.json({ data: products });
+      console.log("Find all products was a success");
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        err: "Internal error",
+      });
     });
-  });
-
 });
 
 // Find one Product by its `id` value
 router.get("/:id", (req, res) => {
-  Product.findByPk(req.params.id, {include: [Category, Tag]})
+  Product.findByPk(req.params.id, { include: [Category, Tag] })
     .then((product) => {
-      res.json({data: product});
+      res.json({ data: product });
       console.log("Find product was a success");
     })
     .catch((err) => {
@@ -34,9 +35,8 @@ router.get("/:id", (req, res) => {
     });
 });
 
-
 // create new product
-router.post('/', (req, res) => {
+router.post("/", (req, res) => {
   Product.create(req.body)
     .then((product) => {
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
@@ -57,10 +57,10 @@ router.post('/', (req, res) => {
       console.log(err);
       res.status(400).json(err);
     });
-})
+});
 
 // update product
-router.put('/:id', (req, res) => {
+router.put("/:id", (req, res) => {
   // update product data
   Product.update(req.body, {
     where: {
@@ -104,22 +104,21 @@ router.put('/:id', (req, res) => {
 router.delete("/:id", (req, res) => {
   Product.destroy({
     where: {
-      id: req.params.id
-    }
+      id: req.params.id,
+    },
   })
-  .then(deleted => {
-    res.json({
-      data: deleted,
+    .then((deleted) => {
+      res.json({
+        data: deleted,
+      });
+      console.log("Successfully deleted Product");
     })
-    console.log("Successfully deleted Product");
-  })
-  .catch((err) => {
-    console.log(err);
-    res.status(500).json({
-      err: 'Internal server error'
-    })
-  })
-  
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        err: "Internal server error",
+      });
+    });
 });
 
 module.exports = router;
